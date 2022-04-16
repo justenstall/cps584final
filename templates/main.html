@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script> -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
+
+<script>
+
+ 	function runModel() {
+		const img = document.getElementById('img');
+	
+		// Load the model.
+		cocoSsd.load().then(model => {
+			// detect objects in the image.
+			model.detect(img).then(predictions => {
+				console.log('Predictions: ', predictions);
+			});
+		});
+	}
+
+
+	// async function load() {
+	// 	const model = await tf.loadLayersModel('model/model.json');
+	// 	return model;
+	// };
+
+	// function predict(model) {
+	// 	// code to connect to the <input> given value will go here (just not yet)
+	// 	const inputTensor = tf.tensor([parseInt(userInput)]);  // then convert to tensor
+
+	// 	// now lets make the prediction, we use .then because the model is a promise
+	// 	// (this is confusing as a Python user, but useful so check it out if interested)
+	// 	model.then(model => {
+	// 		let result = model.predict(inputTensor);  // make prediction like in Python
+	// 		result = result.round().dataSync()[0];  // round prediction and get value
+	// 		alert(result ? "odd" : "even");  // creates pop-up, if result == 1 shows 'odd', otherwise 'even'
+	// 	});
+	// };
+
+	// const model = load();  // load the model now to prevent any delay when user clicks 'Predict'
+</script>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Cat and Dog Detector</title>
+</head>
+
+<body>
+	<h1>Hello world.</h1>
+	<input userInput="userInput" label="image" type='file' placeholder="Upload an image" onchange="runModel();" />
+</body>
+
+</html>
