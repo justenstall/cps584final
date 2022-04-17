@@ -1,42 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
 <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script> -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script> -->
 
 <script>
+	const modelUrl = "/static/model/model.json"
 
- 	function runModel() {
-		const img = document.getElementById('img');
-	
+	function runModel(imagefile) {
+		img = document.getElementById('outImage');
+		console.log("Predicting on image:", img.src)
+
+
+		// Create tensor from the image
+		document.getElementById('predictions').innerHTML = "Loading image..."
+		// , [1,-1,-1,3]
+		imageTensor = tf.browser.fromPixels(img)
+
+		imageTensor.print()
+
 		// Load the model.
-		cocoSsd.load().then(model => {
+		document.getElementById('predictions').innerHTML = "Loading model..."
+		tf.loadGraphModel(modelUrl).then(model => {
 			// detect objects in the image.
-			model.detect(img).then(predictions => {
+			document.getElementById('predictions').innerHTML = "Creating predictions..."
+			model.predict(imageTensor).then(predictions => {
+				document.getElementById('predictions').innerHTML = predictions
 				console.log('Predictions: ', predictions);
 			});
 		});
 	}
 
+	function handleInput(event) {
+		var tgt = event.target || window.event.srcElement,
+			files = tgt.files;
 
-	// async function load() {
-	// 	const model = await tf.loadLayersModel('model/model.json');
-	// 	return model;
-	// };
+		// FileReader support
+		if (FileReader && files && files.length) {
+			var fr = new FileReader();
+			fr.onload = function () {
+				// image.src = URL.createObjectURL(event.target.files[0]);
+				// document.getElementById("outImage").src = fr.result;
+				document.getElementById("outImage").src = URL.createObjectURL(files[0]);
+			}
+			fr.readAsDataURL(files[0]);
 
-	// function predict(model) {
-	// 	// code to connect to the <input> given value will go here (just not yet)
-	// 	const inputTensor = tf.tensor([parseInt(userInput)]);  // then convert to tensor
+			runModel(files[0]);
+		}
 
-	// 	// now lets make the prediction, we use .then because the model is a promise
-	// 	// (this is confusing as a Python user, but useful so check it out if interested)
-	// 	model.then(model => {
-	// 		let result = model.predict(inputTensor);  // make prediction like in Python
-	// 		result = result.round().dataSync()[0];  // round prediction and get value
-	// 		alert(result ? "odd" : "even");  // creates pop-up, if result == 1 shows 'odd', otherwise 'even'
-	// 	});
-	// };
+		// Not supported
+		else {
+			// fallback -- perhaps submit the input to an iframe and temporarily store
+			// them on the server until the user's session ends.
+			document.getElementById('predictions').innerHTML = "Invalid input"
+		}
+	}
 
 	// const model = load();  // load the model now to prevent any delay when user clicks 'Predict'
 </script>
@@ -50,7 +70,10 @@
 
 <body>
 	<h1>Hello world.</h1>
-	<input userInput="userInput" label="image" type='file' placeholder="Upload an image" onchange="runModel();" />
+	<input onchange="handleInput(event)" id="inImage" label="inImage" type='file' placeholder="Upload an image" />
+	<img id="outImage" src="" alt="preview of image uploaded" height="200" />
+	<h2>Predictions:</h2>
+	<p id="predictions"></p>
 </body>
 
 </html>
